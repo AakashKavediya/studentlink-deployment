@@ -1,0 +1,128 @@
+const express = require('express');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const cors = require('cors');
+require('./mongoose/mongooseConnection');
+const User = require('./mongoose/mongooseSignupSchema');
+
+const app = express();
+
+// Middleware
+app.use(cors());
+app.use(express.json());
+
+// Environment variables
+const JWT_SECRET = process.env.JWT_SECRET || 'your_jwt_secret_here';
+const PORT = process.env.PORT || 5000;
+
+// Helper function for error handling
+const handleError = (res, error, message = 'Something went wrong') => {
+  console.error(error);
+  res.status(500).json({ success: false, message });
+};
+
+// SIGNUP
+app.post('/signup', async (req, res) => {
+  try {
+    const { firstName, lastName, emailID, password } = req.body;
+
+    // Check if user exists
+    const existingUser = await User.findOne({ emailID });
+    if (existingUser) {
+      return res.status(400).json({ success: false, message: 'Email already in use' });
+    }
+
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Create user
+    const newUser = await User.create({
+      firstName,
+      lastName,
+      emailID,
+      password: hashedPassword
+    });
+
+    // Return response without password
+    const userResponse = {
+      firstName: newUser.firstName,
+      lastName: newUser.lastName,
+      emailID: newUser.emailID
+    };
+
+    res.status(201).json({ success: true, message: 'User created', user: userResponse });
+  } catch (error) {
+    handleError(res, error, 'Failed to create user');
+  }
+});
+
+// SIGNIN
+app.post('/signin', async (req, res) => {
+  try {
+    const { emailID, password } = req.body;
+
+    // Find user
+    const user = await User.findOne({ emailID });
+    if (!user) {
+      return res.status(401).json({ success: false, message: 'Invalid credentials' });
+    }
+
+    // Check password
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(401).json({ success: false, message: 'Invalid credentials' });
+    }
+
+    // Create token
+    const token = jwt.sign(
+      { userId: user._id, emailID: user.emailID },
+      JWT_SECRET,
+      { expiresIn: '7d' }
+    );
+
+    // Return user data without password
+    const userResponse = {
+      id: user._id,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      emailID: user.emailID
+    };
+
+    res.json({ success: true, token, user: userResponse });
+  } catch (error) {
+    handleError(res, error, 'Login failed');
+  }
+});
+
+// GET USER PROFILE
+app.get('/profile/:id', async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id).select('-password');
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+    res.json({ success: true, user });
+  } catch (error) {
+    handleError(res, error, 'Failed to fetch user');
+  }
+});
+
+// Start server
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
+
+// Handle uncaught exceptions
+process.on('uncaughtException', (error) => {
+  console.error('Uncaught Exception:', error);
+});
+
+// Handle unhandled promise rejections
+process.on('unhandledRejection', (error) => {
+  console.error('Unhandled Rejection:', error);
+});
+
+
+
+
+

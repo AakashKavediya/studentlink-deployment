@@ -1,0 +1,29 @@
+{
+  "name": "collegeappserver",
+  "version": "1.1.1",
+  "description": "This is a college server make for college OLX application. This server will handle all the backend data of the application",
+  "license": "ISC",
+  "author": "Aakash Kavediya",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  },
+  "dependencies": {
+    "@react-native-async-storage/async-storage": "^2.2.0",
+    "bcrypt": "^6.0.0",
+    "cors": "^2.8.5",
+    "dotenv": "^17.0.1",
+    "express": "^5.1.0",
+    "gridfs-stream": "^1.1.1",
+    "jsonwebtoken": "^9.0.2",
+    "jsrsasign": "^11.1.0",
+    "mongodb": "^6.17.0",
+    "mongoose": "^8.16.1",
+    "multer": "^2.0.1",
+    "node-jose": "^2.2.0",
+    "nodemon": "^3.1.10"
+  }
+}
