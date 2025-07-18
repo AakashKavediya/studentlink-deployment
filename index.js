@@ -1,3 +1,5 @@
+require('dotenv').config(); // must be at the very top
+
 //External Libraries
 const express = require('express')
 const cors = require('cors')
@@ -14,6 +16,10 @@ const path = require('path');
 const multer = require('multer');
 const fs = require('fs');
 const mongoose = require('mongoose');
+
+//Variables
+const PORT = process.env.PORT || 5000
+
 
 
 //Initialization
@@ -455,6 +461,6 @@ app.get('/events/:id/image', async (req, res) => {
 });
 
 //Express Server
-app.listen(5000, ()=>{
+app.listen(PORT, ()=>{
   console.log("Backend Server Started")
 })
