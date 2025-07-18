@@ -1,8 +1,4 @@
 // connectDB.js
-require('dotenv').config(); 
-
-//Variable
-const mongo_URL = process.env.MONGO_URI
 const mongoose = require('mongoose');
 
 const connectDB = async () => {
