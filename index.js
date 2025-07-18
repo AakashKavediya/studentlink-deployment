@@ -36,7 +36,7 @@ app.post('/signup', async (req, res) => {
   try {
     const { firstName, lastName, emailID, password } = req.body;
 
-    const hashpassword = await bcrypt.hash(password, 10);
+    const hashpassword = await bcrypt.hash(password, 6);
     console.log("Hashed Password = ", hashpassword);
 
     // Check if user already exists
@@ -66,46 +66,46 @@ app.post('/signup', async (req, res) => {
     res.status(500).send("Internal server error");
   }
 });
-
 app.post('/signin', async (req, res) => {
+  console.time("signin"); // ✅ Start timing here
+
   try {
     const { emailID, password } = req.body;
 
-    // Input validation
     if (!emailID || !password) {
       return res.status(400).json({ success: false, message: 'Email and password are required' });
     }
 
     const user = await users.findOne({ emailID });
-    
+
     if (!user) {
       return res.status(401).json({ success: false, message: 'Invalid credentials' });
     }
 
     const isPasswordMatch = await bcrypt.compare(password, user.password);
-    
+
     if (!isPasswordMatch) {
       return res.status(401).json({ success: false, message: 'Invalid credentials' });
     }
 
-    // Successful login
     res.json({ 
       success: true,
       message: 'Login successful',
       user: {
-        // Return only non-sensitive user data
         id: user._id,
         email: user.emailID,
         name: user.name
-        // Add other non-sensitive fields as needed
       }
     });
 
   } catch (e) {
     console.error("Sign in Error:", e);
     res.status(500).json({ success: false, message: 'Server error' });
+  } finally {
+    console.timeEnd("signin"); // ✅ End timing here no matter what
   }
 });
+
 
 // app.get('/myProfile', async(req,res)=>{
 //   const emailID = req.body
