@@ -3,6 +3,8 @@ const express = require('express')
 const cors = require('cors')
 const bcrypt = require('bcrypt')
 const router = express.Router();
+const helmet = require('helmet');
+const compression = require('compression');
 //Internal code
 const connectDB = require ('./mongoose/mongooseConnection')
 const users = require('./mongoose/mongooseSignupSchema')
@@ -28,8 +30,10 @@ connectDB()
 app.use('/uploads', express.static('uploads'));
 
 //middel ware
-app.use(express.json())
-app.use(cors())
+app.use(express.json());
+app.use(cors());
+app.use(compression());
+app.use(helmet());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 //Sign up code
@@ -37,7 +41,7 @@ app.post('/signup', async (req, res) => {
   try {
     const { firstName, lastName, emailID, password } = req.body;
 
-    const hashpassword = await bcrypt.hash(password, 6);
+    const hashpassword = await bcrypt.hash(password, 10);
     console.log("Hashed Password = ", hashpassword);
 
     // Check if user already exists
